@@ -1,3 +1,5 @@
+package minigit;
+
 import java.util.*;
 
 public class Commit {

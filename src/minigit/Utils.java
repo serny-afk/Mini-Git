@@ -1,3 +1,5 @@
+package minigit;
+
 import java.security.*;
 
 public class Utils {

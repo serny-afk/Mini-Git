@@ -1,3 +1,5 @@
+package minigit;
+
 public class MiniGit {
     public static void main(String[] args) {
         System.out.println("Minigit start!");
