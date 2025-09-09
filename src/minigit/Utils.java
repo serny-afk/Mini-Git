@@ -5,6 +5,7 @@ import java.security.*;
 public class Utils {
     // create byte sequence to hash in sha1
     // data is a string of all metadata and file content of the object
+    // throw s UnsupportedEncodingException in getBytes if encoding type is not supported
     public static byte[] prefix(String type, String data) throws Exception{
         byte[] dataBytes = data.getBytes("UTF-8");
 
