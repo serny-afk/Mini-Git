@@ -1,3 +1,17 @@
+/* All trees, subtrees, commit and blobs are hashed to give oids (object ids),
+ * the actual object files are then saved in minigit/objects.
+ * 
+ * Trees are lists of oids that point to other objects,
+ * these oids can point to subtrees,
+ * oids act as filepaths to object files
+ * 
+ * How to access commits?
+ * Start with latest commit,
+ * search upwards through parents until specific commit is found
+ * Graph traversal
+ * Also can find directly via oid *
+ */
+
 package minigit;
 
 import java.nio.file.Files;
