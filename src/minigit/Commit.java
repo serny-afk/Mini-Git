@@ -6,8 +6,8 @@ import java.util.*;
  * Metadata contains
  * tree_oid
  * parent (commits)
- * author
- * commiter
+ * author (optional)
+ * commiter (optional)
  * commit message
  * 
  * How to make a commit
@@ -22,21 +22,62 @@ import java.util.*;
  * If another tree_oid, go down that tree
  * If blob oid, recreate blob in working directory to "load" state
  * Repeat until end of tree reach, oid = None
+ * 
+ * 
  */
 
 public class Commit {
-    int treeOid;
-    String message;
-    Blob blob;
+    private String treeOid;
+    private String parents[];
+    private String message;
+    public String objectDirectory = "./minigit/objects";
 
     public Commit() {}
 
-    public Commit(String message, String content) {
+    public Commit(String treeOid, String message) {
+        this.treeOid = treeOid;
         this.message = message;
-        blob
     }
 
-    public int createCommit() {
+    // constructors
+    public void setTreeOid(String treeOid) {
+        this.treeOid = treeOid;
+    }
 
+    public void setParents(String parents[]) {
+        this.parents = parents;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    // accessors
+    public String getTreeOid() {
+        return treeOid;
+    }
+
+    public String[] getParents() {
+        return parents;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    // unique methods
+    public String parseData() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(treeOid);
+        for (String parent : parents) {
+            sb.append(parent);
+        }
+        sb.append(message);
+        return sb.toString();
+    }
+
+    public void commit() {
+        String data = parseData();
+        String hash = Utils.sha1(Utils.prefix("commit", data));
     }
 }
