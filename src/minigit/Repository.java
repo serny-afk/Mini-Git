@@ -12,7 +12,6 @@ import interfaces.IRepository;
 
 public class Repository implements IRepository {
 
-    // TODO: manage commits, blobs, index
     private final IIndex index; // staging area
     private final String repoPath = ".minigit"; // root folder
     private final List<Map<String, String>> commits = new ArrayList<>(); // commits
@@ -31,6 +30,7 @@ public class Repository implements IRepository {
             System.out.println("Initialized empty minigit repo in " + this.repoPath);
         } catch (IOException e) {
             e.printStackTrace(); // replace with throw new exception later on
+            // throw new RuntimeException(e);
         }
     }
 
@@ -47,8 +47,11 @@ public class Repository implements IRepository {
             // stage in index
             this.index.add(filename, blob.getHash());
 
+            System.out.println("Added " + filename + " -> " + blob.getHash());
+
         } catch (IOException e) {
             e.printStackTrace(); // replace with throw new exception later on
+            // throw new RuntimeException(e);
         }
     }
 
