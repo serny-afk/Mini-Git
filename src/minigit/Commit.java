@@ -27,7 +27,7 @@ import java.util.*;
  */
 
 public class Commit {
-    private String treeOid;
+    /*private String treeOid;
     private String parents[];
     private String message;
     public String objectDirectory = "./minigit/objects";
@@ -39,8 +39,7 @@ public class Commit {
         this.message = message;
     }
 
-<<<<<<< HEAD
-=======
+
     // constructors
     public void setTreeOid(String treeOid) {
         this.treeOid = treeOid;
@@ -83,4 +82,5 @@ public class Commit {
         String hash = Utils.sha1(Utils.prefix("commit", data));
     }
 >>>>>>> 0c8bb17e928f447af078f5856228c061bfa941d0
+*/
 }
