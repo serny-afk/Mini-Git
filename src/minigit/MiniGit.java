@@ -1,5 +1,7 @@
 package minigit;
 
+// javac -d bin src\interfaces\*.java src\minigit\*.java
+
 public class MiniGit {
     public static void main(String[] args) {
         System.out.println("MiniGit start!");

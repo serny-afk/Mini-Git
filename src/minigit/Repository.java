@@ -14,6 +14,8 @@
 
 package minigit;
 
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,46 +29,36 @@ import interfaces.IRepository;
 public class Repository implements IRepository {
 
     private final IIndex index; // staging area
-    private final String repoPath = ".minigit"; // root folder
-    private final List<Map<String, String>> commits = new ArrayList<>(); // commits
-
+    private final String repoPath = ".minigit"; // root folder/
 
     public Repository(IIndex index) {
         this.index = index;
+        this.index.load();
     }
 
     @Override
     public void init() {
         // creates a ".minigit/blobs" folder
         try {
-            Path blobsDir = Paths.get(repoPath, "blobs");
-            Files.createDirectories(blobsDir);
-            System.out.println("Initialized empty minigit repo in " + this.repoPath);
+            Files.createDirectories(Paths.get(repoPath, "blobs"));
+            Files.createDirectories(Paths.get(repoPath, "commits"));
+            Files.writeString(Paths.get(repoPath, "HEAD"), ""); // empty head
+            System.out.println("Initialized empty MiniGit repo in " + repoPath);
         } catch (IOException e) {
-            e.printStackTrace(); // replace with throw new exception later on
-            // throw new RuntimeException(e);
+            throw new RuntimeException("Failed to initialize repository", e);
         }
     }
 
     @Override
     public void add(String filename) {
-        try {
-            //read file content
-            String content = Files.readString(Paths.get(filename));
+        // blob creation and saving
+        IBlob blob = new Blob(filename);
+        blob.saveBlob();
 
-            // blob creation and saving
-            IBlob blob = new Blob(content);
-            blob.saveBlob();
+        // stage in index
+        this.index.add(filename, blob.getHash());
 
-            // stage in index
-            this.index.add(filename, blob.getHash());
-
-            System.out.println("Added " + filename + " -> " + blob.getHash());
-
-        } catch (IOException e) {
-            e.printStackTrace(); // replace with throw new exception later on
-            // throw new RuntimeException(e);
-        }
+        System.out.println("Added " + filename + " -> " + blob.getHash());
     }
 
     @Override
@@ -77,19 +69,39 @@ public class Repository implements IRepository {
         for (String file : this.index.listFiles()) {
             snapshot.put(file, this.index.getBlobHash(file));
         }
-        this.commits.add(snapshot);
 
-        // simulates commit -m "message"
-        System.out.println("Committed: " + message);
+        String parent = getHEAD();
+        Commit newCommit = new Commit(message, parent, snapshot);
+
+        // hash the commit data to get a commit ID
+        String commitHash = Utils.sha1(message + System.currentTimeMillis());
+
+        saveCommit(newCommit, commitHash);
+        updateHEAD(commitHash);
+
+        System.out.println("Committed: " + message + " (" + commitHash + ")");
     }
 
     @Override
     public void log() {
-        // prints out commits in reverse order
-        for (int i = this.commits.size() - 1; i >= 0; i--) {
-            System.out.println("Commit #" + (i + 1));
-            this.commits.get(i).forEach((file, hash) -> System.out.println(file + " -> " + hash));
+        String current = getHEAD();
+        if (current == null) {
+            System.out.println("No commits yet.");
+            return;
+        }
+
+        while (current != null) {
+            Commit c = loadCommit(current);
+            if (c == null) { break; }
+
+            System.out.println("=== Commit " + current + " ===");
+            System.out.println("Date: " + new java.util.Date(c.getTimestamp()));
+            System.out.println("Message: " + c.getMessage());
+            System.out.println("Files:");
+            c.getFiles().forEach((f, h) -> System.out.println("  " + f + " -> " + h));
             System.out.println();
+
+            current = c.getParent();
         }
     }
 
@@ -98,6 +110,46 @@ public class Repository implements IRepository {
         System.out.println("Staged files:");
         for (String file : this.index.listFiles()) {
             System.out.println(file + " -> " + this.index.getBlobHash(file));
+        }
+    }
+
+    private void saveCommit(Commit commit, String commitHash) {
+        try {
+            Path dir = Paths.get(repoPath, "commits");
+            Files.createDirectories(dir);
+            try (ObjectOutputStream out = new ObjectOutputStream(
+                    Files.newOutputStream(dir.resolve(commitHash)))) {
+                out.writeObject(commit);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save commit.");
+        }
+    }
+
+    private Commit loadCommit(String commitHash) {
+        try (ObjectInputStream in = new ObjectInputStream(
+                Files.newInputStream(Paths.get(repoPath, "commits", commitHash)))) {
+            return (Commit) in.readObject();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load commit.");
+        }
+    }
+
+    private void updateHEAD(String commitHash) {
+        try {
+            Files.writeString(Paths.get(repoPath, "HEAD"), commitHash);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to update HEAD.");
+        }
+    }
+
+    private String getHEAD() {
+        Path headPath = Paths.get(repoPath, "HEAD");
+        if (!Files.exists(headPath)) return null;
+        try {
+            return Files.readString(headPath).trim();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to get HEAD. (hehe)");
         }
     }
 }

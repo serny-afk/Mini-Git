@@ -1,4 +1,5 @@
 package interfaces;
+import minigit.Commit;
 
 public interface IRepository {
     void init();
@@ -6,4 +7,5 @@ public interface IRepository {
     void commit(String message);
     void log();
     void status();
+
 }

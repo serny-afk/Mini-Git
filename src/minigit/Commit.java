@@ -1,8 +1,11 @@
 package minigit;
 
-import java.util.*;
+import java.io.Serial;
+import java.util.Map;
+import java.io.Serializable;
+import interfaces.ICommit;
 
-/* Commit contains metadata about the content you want to want to "save"
+/* Commit contains metadata about the content you want to "save"
  * Metadata contains
  * tree_oid
  * parent (commits)
@@ -26,47 +29,41 @@ import java.util.*;
  * 
  */
 
-public class Commit {
-    /*private String treeOid;
-    private String parents[];
-    private String message;
-    public String objectDirectory = "./minigit/objects";
+public class Commit implements ICommit, Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    public Commit() {}
+    private final Map<String, String> files;
+    private final String parent;
+    private final String message;
+    private final long timestamp;
 
-    public Commit(String treeOid, String message) {
-        this.treeOid = treeOid;
+    public Commit(String message, String parent, Map<String, String> files) {
         this.message = message;
+        this.parent = parent;
+        this.files = files;
+        this.timestamp = System.currentTimeMillis();
     }
 
-
-    // constructors
-    public void setTreeOid(String treeOid) {
-        this.treeOid = treeOid;
-    }
-
-    public void setParents(String parents[]) {
-        this.parents = parents;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    // accessors
-    public String getTreeOid() {
-        return treeOid;
-    }
-
-    public String[] getParents() {
-        return parents;
-    }
-
+    @Override
     public String getMessage() {
-        return message;
+        return this.message;
+    }
+
+    public String getParent() {
+        return this.parent;
+    }
+
+    public Map<String, String> getFiles() {
+        return files;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 
     // unique methods
+    /*
     public String parseData() {
         StringBuilder sb = new StringBuilder();
         sb.append(treeOid);
@@ -81,6 +78,6 @@ public class Commit {
         String data = parseData();
         String hash = Utils.sha1(Utils.prefix("commit", data));
     }
->>>>>>> 0c8bb17e928f447af078f5856228c061bfa941d0
-*/
+     */
+
 }

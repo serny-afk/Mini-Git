@@ -4,6 +4,7 @@ import interfaces.IBlob;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.charset.StandardCharsets;
 
 public class Blob implements IBlob {
     private String filename;
@@ -13,11 +14,10 @@ public class Blob implements IBlob {
     public Blob(String filename) {
         this.filename = filename;
         try {
-            String content = Files.readString(Paths.get(filename));
+            String content = Files.readString(Paths.get(filename), StandardCharsets.UTF_8);
             this.hash = Utils.sha1(content);
         } catch (IOException e) {
             e.printStackTrace();
-            // throw new RuntimeException(e);
         }
     }
 
@@ -36,11 +36,10 @@ public class Blob implements IBlob {
         Path blobPath = Paths.get(blobDir, this.hash);
         if (!Files.exists(blobPath)) {
             try {
-                String content = Files.readString(Paths.get(filename));
+                String content = Files.readString(Paths.get(filename), StandardCharsets.UTF_8);
                 Files.writeString(blobPath, content);
             } catch (IOException e) {
                 e.printStackTrace();
-                // throw new RuntimeException(e);
             }
         }
     }
