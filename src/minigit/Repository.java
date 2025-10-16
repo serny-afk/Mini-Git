@@ -85,14 +85,29 @@ public class Repository implements IRepository {
     @Override
     public void log() {
         String current = getHEAD();
-        if (current == null) {
+
+        if (current == null || current.isEmpty()) {
             System.out.println("No commits yet.");
             return;
         }
 
-        while (current != null) {
-            Commit c = loadCommit(current);
-            if (c == null) { break; }
+        while (current != null && !current.isEmpty()) {
+            Path commitPath = Paths.get(repoPath, "commits", current);
+
+            if (!Files.exists(commitPath)) {
+                System.out.println("Warning: commit file " + current + " not found.");
+                break;
+            }
+
+            Commit c = null;
+            try {
+                c = loadCommit(current);
+            } catch (RuntimeException e) {
+                System.out.println("Warning: failed to load commit " + current);
+                break;
+            }
+
+            if (c == null) break;
 
             System.out.println("=== Commit " + current + " ===");
             System.out.println("Date: " + new java.util.Date(c.getTimestamp()));
@@ -101,7 +116,7 @@ public class Repository implements IRepository {
             c.getFiles().forEach((f, h) -> System.out.println("  " + f + " -> " + h));
             System.out.println();
 
-            current = c.getParent();
+            current = c.getParent(); // move to parent
         }
     }
 
