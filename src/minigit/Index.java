@@ -7,7 +7,6 @@ import java.io.*;
 public class Index implements IIndex, Serializable {
     private static final long serialVersionUID = 1L;
     private final Map<String, String> stagedFiles = new HashMap<>();
-
     private final String indexFilePath = ".minigit/index.dat";
 
     @Override

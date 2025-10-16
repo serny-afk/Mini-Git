@@ -29,7 +29,7 @@ import interfaces.IRepository;
 public class Repository implements IRepository {
 
     private final IIndex index; // staging area
-    private final String repoPath = ".minigit"; // root folder/
+    private final String repoPath = ".minigit"; // root folder
 
     public Repository(IIndex index) {
         this.index = index;
@@ -38,8 +38,8 @@ public class Repository implements IRepository {
 
     @Override
     public void init() {
-        // creates a ".minigit/blobs" folder
         try {
+            // make folders (blobs, commits, HEAD) under .minigit
             Files.createDirectories(Paths.get(repoPath, "blobs"));
             Files.createDirectories(Paths.get(repoPath, "commits"));
             Files.writeString(Paths.get(repoPath, "HEAD"), ""); // empty head
@@ -51,11 +51,10 @@ public class Repository implements IRepository {
 
     @Override
     public void add(String filename) {
-        // blob creation and saving
+        // blob creation and saving in the folder
         IBlob blob = new Blob(filename);
         blob.saveBlob();
-
-        // stage in index
+        // stage files for commit in the index object
         this.index.add(filename, blob.getHash());
 
         System.out.println("Added " + filename + " -> " + blob.getHash());
@@ -65,15 +64,15 @@ public class Repository implements IRepository {
     public void commit(String message) {
         Map<String, String> snapshot = new HashMap<>();
 
-        // essentially takes staged files and stores them with a message
+        // hashes filename key to blob hash value
         for (String file : this.index.listFiles()) {
             snapshot.put(file, this.index.getBlobHash(file));
         }
 
+        // pointer to previous commit
         String parent = getHEAD();
         Commit newCommit = new Commit(message, parent, snapshot);
-
-        // hash the commit data to get a commit ID
+        // sha1 hashes contents of files, also hashes commit data to get a commit id
         String commitHash = Utils.sha1(message + System.currentTimeMillis());
 
         saveCommit(newCommit, commitHash);
@@ -129,9 +128,14 @@ public class Repository implements IRepository {
     }
 
     private void saveCommit(Commit commit, String commitHash) {
+        // saves commit objects to ./minigit/commits/
         try {
+            // creates path to this folder
             Path dir = Paths.get(repoPath, "commits");
             Files.createDirectories(dir);
+
+            // writing of commit to disk
+            // wraps file as a serializable object
             try (ObjectOutputStream out = new ObjectOutputStream(
                     Files.newOutputStream(dir.resolve(commitHash)))) {
                 out.writeObject(commit);
@@ -142,6 +146,7 @@ public class Repository implements IRepository {
     }
 
     private Commit loadCommit(String commitHash) {
+        // does opposite of savecommit
         try (ObjectInputStream in = new ObjectInputStream(
                 Files.newInputStream(Paths.get(repoPath, "commits", commitHash)))) {
             return (Commit) in.readObject();
@@ -164,7 +169,7 @@ public class Repository implements IRepository {
         try {
             return Files.readString(headPath).trim();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to get HEAD. (hehe)");
+            throw new RuntimeException("Failed to get HEAD.");
         }
     }
 }

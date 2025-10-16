@@ -7,6 +7,7 @@ public class MiniGit {
         // runs on each program command
         // runs are stateless in memory, info is stored on local disk
         System.out.println("MiniGit start!");
+        // yes this prints everytime you run it
         Repository repo = new Repository(new Index());
 
         // check for invalid inputs by user

@@ -33,6 +33,8 @@ public class Commit implements ICommit, Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    // hashmap key stores file name, value stores blob hash
+    // parent tracks previous commit,
     private final Map<String, String> files;
     private final String parent;
     private final String message;
@@ -61,23 +63,5 @@ public class Commit implements ICommit, Serializable {
     public long getTimestamp() {
         return timestamp;
     }
-
-    // unique methods
-    /*
-    public String parseData() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(treeOid);
-        for (String parent : parents) {
-            sb.append(parent);
-        }
-        sb.append(message);
-        return sb.toString();
-    }
-
-    public void commit() {
-        String data = parseData();
-        String hash = Utils.sha1(Utils.prefix("commit", data));
-    }
-     */
 
 }
